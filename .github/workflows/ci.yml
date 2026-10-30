@@ -44,7 +44,7 @@ jobs:
           apt-get install -y --no-install-recommends ca-certificates git python3 python3-gi \
             gir1.2-gtk-4.0 gir1.2-adw-1 gir1.2-appstream-1.0 python3-apt python3-pytest \
             appstream desktop-file-utils xvfb xauth
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ env.CHECKOUT_REF }}
       - name: Run tests
@@ -61,27 +61,29 @@ jobs:
     outputs:
       version: ${{ steps.version.outputs.version }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ env.CHECKOUT_REF }}
+      - name: Build
+        run: ./scripts/build-deb.sh
+      # Read the version from the package rather than the source, so that older tags (whose
+      # source layout differs, e.g. the uam/ package in 1.0.1 and older) can still be released.
       - name: Read version
         id: version
-        run: echo "version=$(python3 -c 'import hangar; print(hangar.VERSION)')" >> "$GITHUB_OUTPUT"
+        run: echo "version=$(dpkg-deb -f dist/hangar_*_all.deb Version)" >> "$GITHUB_OUTPUT"
       - name: Check that the tag matches the version
         if: startsWith(env.CHECKOUT_REF, 'refs/tags/') || github.event_name == 'workflow_dispatch'
         env:
           TAG: ${{ inputs.tag || github.ref_name }}
           VERSION: ${{ steps.version.outputs.version }}
         run: |
-          if [ "$TAG" != "v$VERSION" ]; then
-            echo "::error::Tag $TAG does not match hangar.VERSION $VERSION (expected v$VERSION)"
+          if [ -z "$VERSION" ] || [ "$TAG" != "v$VERSION" ]; then
+            echo "::error::Tag $TAG does not match the package version '$VERSION' (expected v$VERSION)"
             exit 1
           fi
-      - name: Build
-        run: ./scripts/build-deb.sh
       - name: Checksums
         run: cd dist && sha256sum -- *.deb > SHA256SUMS && cat SHA256SUMS
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: hangar-deb
           path: |
@@ -101,7 +103,7 @@ jobs:
     env:
       DEBIAN_FRONTEND: noninteractive
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: hangar-deb
           path: dist
@@ -134,15 +136,17 @@ jobs:
       TAG: ${{ inputs.tag || github.ref_name }}
       VERSION: ${{ needs.build.outputs.version }}
     steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ env.CHECKOUT_REF }}
-      - uses: actions/download-artifact@v4
+      # This workflow's own commit, for scripts/release-notes.py (an older tag may not have it).
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
         with:
           name: hangar-deb
           path: dist
-      - name: Release notes
-        run: ./scripts/release-notes.py "$VERSION" > notes.md && cat notes.md
+      - name: Release notes (from the metainfo inside the .deb)
+        run: |
+          dpkg-deb -x dist/hangar_*_all.deb pkg
+          ./scripts/release-notes.py "$VERSION" --metainfo pkg/usr/share/metainfo/io.github.Rajveer_Mahida.Hangar.metainfo.xml > notes.md
+          cat notes.md
       - name: Create or update the release
         run: |
           if gh release view "$TAG" > /dev/null 2>&1; then

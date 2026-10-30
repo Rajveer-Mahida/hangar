@@ -2,9 +2,10 @@
 """Print the release notes of one version as Markdown, taken from the AppStream metainfo.
 
 The metainfo <release> entry is the single place release notes are written; CI uses this
-script for the GitHub release text.  Usage: scripts/release-notes.py [VERSION]
+script for the GitHub release text.  Usage: scripts/release-notes.py [VERSION] [--metainfo FILE]
 """
 
+import argparse
 import os
 import sys
 import xml.etree.ElementTree as ET
@@ -38,7 +39,11 @@ def release_notes(version: str, path: str = METAINFO) -> str:
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Print the release notes of one version as Markdown.")
+    parser.add_argument("version", nargs="?", default=VERSION)
+    parser.add_argument("--metainfo", default=METAINFO, help="metainfo file to read (default: this tree's)")
+    args = parser.parse_args()
     try:
-        sys.stdout.write(release_notes(sys.argv[1] if len(sys.argv) > 1 else VERSION))
+        sys.stdout.write(release_notes(args.version, args.metainfo))
     except LookupError as exc:
         sys.exit(f"error: {exc}")

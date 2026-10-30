@@ -29,6 +29,21 @@ def test_lists_become_markdown_bullets(tmp_path):
     assert release_notes.release_notes("9.9.9", str(path)) == "Intro text.\n\n- One thing\n- Two\n"
 
 
+def test_command_line_reads_metainfo_from_given_file(tmp_path):
+    # CI passes the metainfo shipped in the .deb, so an older tag's notes can be read with
+    # today's script.
+    import subprocess
+    import sys
+
+    path = tmp_path / "metainfo.xml"
+    path.write_text('<component><releases><release version="0.9"><description><p>Old.</p>'
+                    "</description></release></releases></component>")
+    script = os.path.join(ROOT, "scripts", "release-notes.py")
+    out = subprocess.run([sys.executable, script, "0.9", "--metainfo", str(path)],
+                         capture_output=True, text=True, check=True).stdout
+    assert out == "Old.\n"
+
+
 def test_unknown_version_is_an_error():
     with pytest.raises(LookupError):
         release_notes.release_notes("0.0.0-missing")
