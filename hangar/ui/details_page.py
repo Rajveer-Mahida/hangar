@@ -14,7 +14,7 @@ from .widgets import app_image, confidence_pill, esc, format_date, pill, size_te
 
 
 class DetailsPage(Adw.NavigationPage):
-    __gtype_name__ = "UamDetailsPage"
+    __gtype_name__ = "HangarDetailsPage"
     __gsignals__ = {"show-app": (GObject.SignalFlags.RUN_FIRST, None, (str,))}
 
     def __init__(self, controller: AppController, record: AppRecord, window):

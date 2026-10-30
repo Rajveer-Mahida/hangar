@@ -367,7 +367,11 @@ def appimage_install_plan(source_path: str) -> dict[str, str]:
     target = source_path if os.path.dirname(source_path) == apps_dir else os.path.join(apps_dir, base)
     name, version = name_and_version(base)
     stem = re.sub(r"[^A-Za-z0-9_.-]", "-", name.lower()).strip("-") or "appimage"
-    launcher = os.path.join(home, ".local", "share", "applications", f"uam-appimage-{stem}.desktop")
+    apps = os.path.join(home, ".local", "share", "applications")
+    launcher = os.path.join(apps, f"hangar-appimage-{stem}.desktop")
+    legacy = os.path.join(apps, f"uam-appimage-{stem}.desktop")  # name used by 1.0.1 and older
+    if os.path.lexists(legacy) and not os.path.lexists(launcher):
+        launcher = legacy
     return {"source": source_path, "target": target, "launcher": launcher, "name": name, "version": version}
 
 
@@ -396,7 +400,7 @@ def appimage_install_operation(plan: dict[str, str]) -> Operation:
         kf.set_string(group, "Icon", "application-x-executable")
         kf.set_string(group, "Terminal", "false")
         kf.set_string(group, "Categories", "Utility;")
-        kf.set_string(group, "X-UAM-Installed", "true")
+        kf.set_string(group, "X-Hangar-Installed", "true")
         if plan.get("version"):
             kf.set_string(group, "X-AppImage-Version", plan["version"])
         kf.save_to_file(launcher)

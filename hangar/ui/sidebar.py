@@ -42,7 +42,7 @@ class _SectionRow(Gtk.ListBoxRow):
 
 
 class Sidebar(Gtk.ListBox):
-    __gtype_name__ = "UamSidebar"
+    __gtype_name__ = "HangarSidebar"
     __gsignals__ = {"section-selected": (GObject.SignalFlags.RUN_FIRST, None, (str,))}
 
     def __init__(self):

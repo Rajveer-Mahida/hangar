@@ -34,7 +34,7 @@ SOURCE_COLORS = {
 class CompositionBar(Gtk.Widget):
     """Horizontal stacked bar showing the share of each installation source."""
 
-    __gtype_name__ = "UamCompositionBar"
+    __gtype_name__ = "HangarCompositionBar"
 
     def __init__(self):
         super().__init__()
@@ -96,7 +96,7 @@ class StatCard(Gtk.Button):
 
 
 class DashboardPage(Gtk.Box, LazyRefresh):
-    __gtype_name__ = "UamDashboardPage"
+    __gtype_name__ = "HangarDashboardPage"
     __gsignals__ = {
         "navigate": (GObject.SignalFlags.RUN_FIRST, None, (str, str)),
         "show-app": (GObject.SignalFlags.RUN_FIRST, None, (str,)),

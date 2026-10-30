@@ -7,8 +7,8 @@ Python). It installs:
 
 | Path | Content |
 | --- | --- |
-| `/usr/bin/hangar` | launcher script (`python3 -m uam`) |
-| `/usr/share/hangar/uam/` | the Python package |
+| `/usr/bin/hangar` | launcher script (`python3 -m hangar`) |
+| `/usr/share/hangar/hangar/` | the Python package |
 | `/usr/libexec/hangar/hangar-helper` | root helper, 0755 root:root |
 | `/usr/share/polkit-1/actions/io.github.Rajveer_Mahida.Hangar.policy` | PolicyKit action bound to the helper path |
 | `/usr/share/applications/…desktop`, `/usr/share/icons/hicolor/…`, `/usr/share/metainfo/…` | desktop integration |

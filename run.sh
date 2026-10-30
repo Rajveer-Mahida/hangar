@@ -23,6 +23,6 @@ case "${1:-}" in
 esac
 
 # Development mode: administrative actions run the in-tree helper through pkexec.
-export UAM_DEV_HELPER=1
+export HANGAR_DEV_HELPER=1
 export PYTHONPATH="$HERE${PYTHONPATH:+:$PYTHONPATH}"
-exec python3 -P -m uam "$@"
+exec python3 -P -m hangar "$@"

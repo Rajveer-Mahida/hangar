@@ -4,14 +4,14 @@ import os
 
 from conftest import make_appimage, write_desktop, write_exec
 
-from uam.core.application_model import Confidence, PackageManager, Source
-from uam.core.desktop_entry import DesktopIndex, parse_desktop_file, resolve_program, split_exec
-from uam.core.scanner import Scanner
-from uam.core.database import Database
-from uam.core.settings import Settings
-from uam.package_managers.appimage import AppImageProvider, appimage_type, name_and_version, read_update_info
-from uam.package_managers.base import ScanContext
-from uam.package_managers.manual import ManualProvider, install_root
+from hangar.core.application_model import Confidence, PackageManager, Source
+from hangar.core.desktop_entry import DesktopIndex, parse_desktop_file, resolve_program, split_exec
+from hangar.core.scanner import Scanner
+from hangar.core.database import Database
+from hangar.core.settings import Settings
+from hangar.package_managers.appimage import AppImageProvider, appimage_type, name_and_version, read_update_info
+from hangar.package_managers.base import ScanContext
+from hangar.package_managers.manual import ManualProvider, install_root
 
 
 # -- desktop entries -----------------------------------------------------------

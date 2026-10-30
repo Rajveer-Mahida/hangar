@@ -493,12 +493,12 @@ def appimage_replace_operation(record: AppRecord, plan: dict) -> Operation:
                         kf.set_string(group, key, value.replace(old, new))
                         changed = True
             if changed:
-                tmp = launcher + ".uam-tmp"
+                tmp = launcher + ".hangar-tmp"
                 kf.save_to_file(tmp)
                 os.replace(tmp, launcher)
                 log(f"Updated launcher {launcher}")
         for link in plan["symlinks"]:
-            tmp = link + ".uam-tmp"
+            tmp = link + ".hangar-tmp"
             os.symlink(new, tmp)
             os.replace(tmp, link)
             log(f"Pointed {link} at the new version")

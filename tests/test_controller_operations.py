@@ -2,7 +2,7 @@
 
 from types import SimpleNamespace
 
-from uam.services.inventory_service import AppController
+from hangar.services.inventory_service import AppController
 
 
 def _finish(op):

@@ -23,7 +23,7 @@ PROVIDER_SOURCES = {
 
 
 class PackageManagersPage(Gtk.Box, LazyRefresh):
-    __gtype_name__ = "UamPackageManagersPage"
+    __gtype_name__ = "HangarPackageManagersPage"
     __gsignals__ = {
         "refresh-lists": (GObject.SignalFlags.RUN_FIRST, None, ()),
         "remove-unused-runtimes": (GObject.SignalFlags.RUN_FIRST, None, (str,)),

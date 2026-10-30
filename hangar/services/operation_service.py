@@ -39,7 +39,7 @@ Step = CommandStep | PythonStep
 
 
 class Operation(GObject.Object):
-    __gtype_name__ = "UamOperation"
+    __gtype_name__ = "HangarOperation"
     __gsignals__ = {"changed": (GObject.SignalFlags.RUN_FIRST, None, ())}
 
     def __init__(self, title: str, kind: str, targets: list[str], steps: list[Step], source: str = "",
@@ -76,7 +76,7 @@ class Operation(GObject.Object):
 
 
 class OperationManager(GObject.Object):
-    __gtype_name__ = "UamOperationManager"
+    __gtype_name__ = "HangarOperationManager"
     __gsignals__ = {
         "queue-changed": (GObject.SignalFlags.RUN_FIRST, None, ()),
         "operation-finished": (GObject.SignalFlags.RUN_FIRST, None, (object,)),

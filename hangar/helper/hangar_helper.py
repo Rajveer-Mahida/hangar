@@ -54,7 +54,7 @@ APT_COMMON = ["-y", "-o", "DPkg::Lock::Timeout=120", "-o", "APT::Status-Fd=1",
 # Installs and upgrades must never remove packages as a side effect.
 APT_NO_REMOVE = ["--no-remove"]
 
-# --- removal policy (mirrors uam/core/safety.py; tests keep them in sync) ---
+# --- removal policy (mirrors hangar/core/safety.py; tests keep them in sync) ---
 FORBIDDEN_TREES = (
     "/bin", "/boot", "/dev", "/etc", "/lib", "/lib32", "/lib64", "/libx32",
     "/proc", "/root", "/run", "/sbin", "/snap", "/sys", "/srv", "/lost+found",
@@ -267,7 +267,7 @@ def copy_verified(path, sha256, suffix):
             raise HelperError("not a regular file")
         if st.st_size > 4 * 1024 ** 3:
             raise HelperError("file is too large")
-        workdir = tempfile.mkdtemp(prefix="uam-helper-", dir="/var/tmp")
+        workdir = tempfile.mkdtemp(prefix="hangar-helper-", dir="/var/tmp")
         os.chmod(workdir, 0o700)
         target = os.path.join(workdir, "package" + suffix)
         digest = hashlib.sha256()

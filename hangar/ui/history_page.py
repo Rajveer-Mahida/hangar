@@ -36,7 +36,7 @@ STATUS_ICONS = {"success": "emblem-ok-symbolic", "failed": "dialog-error-symboli
 
 
 class HistoryPage(Gtk.Box, LazyRefresh):
-    __gtype_name__ = "UamHistoryPage"
+    __gtype_name__ = "HangarHistoryPage"
 
     def __init__(self, controller: AppController, window):
         super().__init__(orientation=Gtk.Orientation.VERTICAL)

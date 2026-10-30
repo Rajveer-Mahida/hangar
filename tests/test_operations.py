@@ -5,8 +5,8 @@ import shutil
 import pytest
 from gi.repository import GLib
 
-from uam.core.database import Database
-from uam.services.operation_service import CommandStep, Operation, OperationManager, PythonStep
+from hangar.core.database import Database
+from hangar.services.operation_service import CommandStep, Operation, OperationManager, PythonStep
 
 
 def run_until_idle(manager: OperationManager, timeout: float = 20.0) -> None:
@@ -89,7 +89,7 @@ def test_operations_run_one_at_a_time_in_order():
 
 
 def test_process_runner_splits_lines_and_carriage_returns():
-    from uam.services.process_service import ProcessRunner
+    from hangar.services.process_service import ProcessRunner
 
     printf = shutil.which("printf") or "/usr/bin/printf"
     lines, result = [], {}

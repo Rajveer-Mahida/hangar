@@ -4,15 +4,15 @@ import os
 
 from conftest import write_desktop
 
-from uam.core.application_model import Confidence, PackageManager, Source
-from uam.core.desktop_entry import DesktopIndex
-from uam.package_managers import apt as apt_module
-from uam.package_managers.apt import AptProvider, DpkgDatabase
-from uam.package_managers.base import ScanContext
-from uam.package_managers.flatpak import FlatpakProvider, parse_list_output, parse_update_output
-from uam.package_managers.snap import SnapdClient, SnapProvider
-from uam.services import privilege_service
-from uam.services.process_service import explain_failure, parse_progress
+from hangar.core.application_model import Confidence, PackageManager, Source
+from hangar.core.desktop_entry import DesktopIndex
+from hangar.package_managers import apt as apt_module
+from hangar.package_managers.apt import AptProvider, DpkgDatabase
+from hangar.package_managers.base import ScanContext
+from hangar.package_managers.flatpak import FlatpakProvider, parse_list_output, parse_update_output
+from hangar.package_managers.snap import SnapdClient, SnapProvider
+from hangar.services import privilege_service
+from hangar.services.process_service import explain_failure, parse_progress
 
 # -- dpkg / APT --------------------------------------------------------------------
 
@@ -243,18 +243,18 @@ def test_disk_full_wins_over_dpkg_failure():
 
 
 def test_helper_argv_uses_pkexec_and_argument_arrays(monkeypatch):
-    monkeypatch.setenv("UAM_DEV_HELPER", "1")
+    monkeypatch.setenv("HANGAR_DEV_HELPER", "1")
     monkeypatch.setattr(privilege_service.shutil, "which", lambda name: f"/usr/bin/{name}")
     monkeypatch.setattr(privilege_service, "installed_helper", lambda: None)
     argv = privilege_service.helper_argv("apt-remove", ["--expect=foo", "foo"])
     assert argv[0] == "/usr/bin/pkexec"
     assert argv[-3:] == ["apt-remove", "--expect=foo", "foo"]
     assert all(isinstance(a, str) for a in argv)
-    assert os.path.basename(argv[4]) == "uam_helper.py"
+    assert os.path.basename(argv[4]) == "hangar_helper.py"
 
 
 def test_development_helper_requires_explicit_opt_in(monkeypatch):
-    monkeypatch.delenv("UAM_DEV_HELPER", raising=False)
+    monkeypatch.delenv("HANGAR_DEV_HELPER", raising=False)
     monkeypatch.setattr(privilege_service.shutil, "which", lambda name: f"/usr/bin/{name}")
     monkeypatch.setattr(privilege_service, "installed_helper", lambda: None)
     try:
@@ -266,7 +266,7 @@ def test_development_helper_requires_explicit_opt_in(monkeypatch):
 
 
 def test_helper_argv_validates_before_authentication(monkeypatch):
-    monkeypatch.setenv("UAM_DEV_HELPER", "1")
+    monkeypatch.setenv("HANGAR_DEV_HELPER", "1")
     monkeypatch.setattr(privilege_service.shutil, "which", lambda name: f"/usr/bin/{name}")
     for verb, args in (("apt-remove", ["foo; rm -rf /"]), ("snap-remove", ["$(id)"]),
                        ("flatpak-uninstall", ["../../etc"]), ("remove-paths", ["relative/path"]),

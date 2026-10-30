@@ -38,13 +38,13 @@ install -d -m 0755 "$APPDIR" "$HELPER_DIR" "$PREFIX/bin" "$PREFIX/share/applicat
     "$PREFIX/share/icons/hicolor/scalable/apps" "$PREFIX/share/icons/hicolor/symbolic/apps" \
     "$PREFIX/share/metainfo" /usr/share/polkit-1/actions
 
-rm -rf "$APPDIR/uam"
-cp -r "$SRC/uam" "$APPDIR/uam"
-find "$APPDIR/uam" -name '__pycache__' -prune -exec rm -rf {} +
+rm -rf "$APPDIR/hangar" "$APPDIR/uam"   # uam: the package name in 1.0.1 and older
+cp -r "$SRC/hangar" "$APPDIR/hangar"
+find "$APPDIR/hangar" -name '__pycache__' -prune -exec rm -rf {} +
 chown -R root:root "$APPDIR"
 chmod -R u=rwX,go=rX "$APPDIR"
 
-install -m 0755 -o root -g root "$SRC/uam/helper/uam_helper.py" "$HELPER"
+install -m 0755 -o root -g root "$SRC/hangar/helper/hangar_helper.py" "$HELPER"
 install -m 0755 "$SRC/bin/hangar" "$PREFIX/bin/hangar"
 
 # Pre-1.0 builds were called "Unified App Manager" and used another app ID; remove them.

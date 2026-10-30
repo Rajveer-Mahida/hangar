@@ -5,7 +5,7 @@ import os
 
 import pytest
 
-from uam import VERSION
+from hangar import VERSION
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _spec = importlib.util.spec_from_file_location("release_notes", os.path.join(ROOT, "scripts", "release-notes.py"))

@@ -2,7 +2,7 @@
 """Development helper: start the app, navigate, render the window to PNG, quit.
 
 Usage: scripts/dev_screenshot.py OUTPUT.png [section] [--dark] [--width W --height H] [--details KEY-SUBSTRING]
-Uses a temporary database unless UAM_DB is set. Never performs package operations.
+Uses a temporary database unless HANGAR_DB is set. Never performs package operations.
 """
 import argparse
 import faulthandler
@@ -11,12 +11,12 @@ import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 
-import uam.ui  # noqa: F401  (sets GI versions)
+import hangar.ui  # noqa: F401  (sets GI versions)
 from gi.repository import Adw, Gio, GLib, Graphene, Gtk  # noqa: E402
 
-from uam.application import Application  # noqa: E402
-from uam.core.database import Database  # noqa: E402
-from uam.services.inventory_service import AppController  # noqa: E402
+from hangar.application import Application  # noqa: E402
+from hangar.core.database import Database  # noqa: E402
+from hangar.services.inventory_service import AppController  # noqa: E402
 
 
 def capture(widget, path):
@@ -30,8 +30,8 @@ def capture(widget, path):
 
 
 def main():
-    if os.environ.get("UAM_SHOT_TIMEOUT"):
-        faulthandler.dump_traceback_later(float(os.environ["UAM_SHOT_TIMEOUT"]), exit=True)
+    if os.environ.get("HANGAR_SHOT_TIMEOUT"):
+        faulthandler.dump_traceback_later(float(os.environ["HANGAR_SHOT_TIMEOUT"]), exit=True)
     ap = argparse.ArgumentParser()
     ap.add_argument("output")
     ap.add_argument("section", nargs="?", default="overview")
@@ -48,7 +48,7 @@ def main():
     ap.add_argument("--delay", type=float, default=2.5)
     args = ap.parse_args()
 
-    db_path = os.environ.get("UAM_DB") or os.path.join(os.path.dirname(os.path.abspath(args.output)), "shot.db")
+    db_path = os.environ.get("HANGAR_DB") or os.path.join(os.path.dirname(os.path.abspath(args.output)), "shot.db")
 
     class ShotApp(Application):
         def __init__(self):
@@ -92,7 +92,7 @@ def main():
                         win.uninstall([rec])
                 if args.op_demo:
                     import time
-                    from uam.services.operation_service import Operation, PythonStep
+                    from hangar.services.operation_service import Operation, PythonStep
 
                     def demo(log):
                         for i in range(30):
@@ -108,7 +108,7 @@ def main():
                             if any(w == r.name.lower() for w in wanted)]
                     win.uninstall(recs)
                 if args.install:
-                    from uam.ui.install_dialog import InstallDialog
+                    from hangar.ui.install_dialog import InstallDialog
                     dlg = InstallDialog(win)
                     dlg.present(win)
                     dlg.entry.set_text(args.install)

@@ -19,7 +19,7 @@ FILTERS = [
 
 
 class ManualPage(Gtk.Box, LazyRefresh):
-    __gtype_name__ = "UamManualPage"
+    __gtype_name__ = "HangarManualPage"
     __gsignals__ = {
         "show-app": (GObject.SignalFlags.RUN_FIRST, None, (str,)),
         "open-settings": (GObject.SignalFlags.RUN_FIRST, None, ()),

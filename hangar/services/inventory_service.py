@@ -29,7 +29,7 @@ _SOURCE_KEYS = {label: key for key, label in SOURCE_LABELS.items()}
 
 
 class AppController(GObject.Object):
-    __gtype_name__ = "UamAppController"
+    __gtype_name__ = "HangarAppController"
     __gsignals__ = {
         "inventory-changed": (GObject.SignalFlags.RUN_FIRST, None, ()),
         "updates-changed": (GObject.SignalFlags.RUN_FIRST, None, ()),

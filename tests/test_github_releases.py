@@ -11,9 +11,9 @@ import textwrap
 import pytest
 from conftest import ROOT, make_appimage, write_desktop
 
-from uam.core.application_model import AppRecord, Confidence, PackageManager, Source
-from uam.core.database import Database
-from uam.services import github_service as gh
+from hangar.core.application_model import AppRecord, Confidence, PackageManager, Source
+from hangar.core.database import Database
+from hangar.services import github_service as gh
 
 
 def deb(name="tool", version="1.2.0", homepage="", local=True, vcs=""):
@@ -193,8 +193,8 @@ def test_appimage_swap_updates_launcher_and_trashes_old_version(tmp_path):
     script = textwrap.dedent(f"""
         import sys
         sys.path.insert(0, {ROOT!r})
-        from uam.core.application_model import AppRecord, Confidence, PackageManager, Source
-        from uam.services import github_service as gh
+        from hangar.core.application_model import AppRecord, Confidence, PackageManager, Source
+        from hangar.services import github_service as gh
         r = AppRecord(key="appimage:{old}", name="Tool", source=Source.APPIMAGE, package_manager=PackageManager.NONE,
                       confidence=Confidence.DETECTED, install_path={old!r}, extra={{"launchers": [{launcher!r}]}})
         plan = gh.appimage_replace_plan(r, {new!r})

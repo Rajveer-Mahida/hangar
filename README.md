@@ -256,19 +256,19 @@ GitHub release handling.
 PNG. It's how the screenshots above were made, and it never performs package operations.
 
 ```
-uam/
-├── main.py, application.py   entry point, Adw.Application
-├── core/                     data model, desktop entries, scanner, inventory, SQLite, duplicates, safety rules
-├── package_managers/         apt, snap, flatpak, appimage, manual discovery
-├── services/                 subprocesses, privileges, operation queue, install/update/uninstall, GitHub
-├── helper/uam_helper.py      self-contained root helper, run through pkexec
-├── ui/                       window, pages, dialogs, widgets
-└── resources/styles/         stylesheets (light and dark)
-data/                         .desktop launcher, AppStream metainfo, PolicyKit policy template, icons
-scripts/                      install-deps, install, uninstall, build-deb, release-notes, dev_screenshot
-.github/workflows/ci.yml      tests, .deb build and GitHub releases
-packaging/                    notes on building a proper Debian source package
-tests/                        pytest suite
+hangar/
+├── main.py, application.py     entry point, Adw.Application
+├── core/                       data model, desktop entries, scanner, inventory, SQLite, duplicates, safety rules
+├── package_managers/           apt, snap, flatpak, appimage, manual discovery
+├── services/                   subprocesses, privileges, operation queue, install/update/uninstall, GitHub
+├── helper/hangar_helper.py     self-contained root helper, run through pkexec
+├── ui/                         window, pages, dialogs, widgets
+└── resources/styles/           stylesheets (light and dark)
+data/                           .desktop launcher, AppStream metainfo, PolicyKit policy template, icons
+scripts/                        install-deps, install, uninstall, build-deb, release-notes, dev_screenshot
+.github/workflows/ci.yml        tests, .deb build and GitHub releases
+packaging/                      notes on building a proper Debian source package
+tests/                          pytest suite
 ```
 
 ### CI and releases
@@ -283,7 +283,7 @@ tests/                        pytest suite
 To release a new version:
 
 ```bash
-# 1. set VERSION in uam/__init__.py, e.g. 1.2.0
+# 1. set VERSION in hangar/__init__.py, e.g. 1.2.0
 # 2. add <release version="1.2.0" date="YYYY-MM-DD"> with notes to data/*.metainfo.xml
 git commit -am "Hangar 1.2.0: ..."
 git tag -a v1.2.0 -m "Hangar 1.2.0"

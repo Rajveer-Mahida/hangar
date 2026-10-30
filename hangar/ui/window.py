@@ -35,7 +35,7 @@ from .widgets import relative_time
 
 
 class MainWindow(Adw.ApplicationWindow):
-    __gtype_name__ = "UamMainWindow"
+    __gtype_name__ = "HangarMainWindow"
 
     def __init__(self, app: Adw.Application, controller: AppController):
         super().__init__(application=app, title=APP_NAME, default_width=1220, default_height=800)

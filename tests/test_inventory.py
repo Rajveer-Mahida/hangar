@@ -2,7 +2,7 @@
 
 import sqlite3
 
-from uam.core.application_model import (
+from hangar.core.application_model import (
     AppRecord,
     Classification,
     Confidence,
@@ -12,10 +12,10 @@ from uam.core.application_model import (
     format_size,
     parse_size,
 )
-from uam.core.database import HISTORY_DETAIL_MAX, Database
-from uam.core.inventory import Inventory
-from uam.core.scanner import ScanResult
-from uam.core.settings import Settings
+from hangar.core.database import HISTORY_DETAIL_MAX, Database
+from hangar.core.inventory import Inventory
+from hangar.core.scanner import ScanResult
+from hangar.core.settings import Settings
 
 
 def rec(key, name, source=Source.APT, pm=PackageManager.APT, confidence=Confidence.MANAGED, **kw):
@@ -136,7 +136,7 @@ def test_size_helpers():
 
 
 def test_data_folder_moves_to_new_name(tmp_path, monkeypatch):
-    from uam.core.database import default_db_path
+    from hangar.core.database import default_db_path
 
     monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path))
     legacy = tmp_path / "unified-app-manager"

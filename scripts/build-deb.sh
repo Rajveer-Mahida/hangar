@@ -3,7 +3,7 @@
 # Install it with: sudo apt install ./dist/hangar_<version>_all.deb
 set -euo pipefail
 SRC="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-VERSION="$(python3 -c "import sys; sys.path.insert(0, '$SRC'); import uam; print(uam.VERSION)")"
+VERSION="$(python3 -c "import sys; sys.path.insert(0, '$SRC'); import hangar; print(hangar.VERSION)")"
 APP_ID="io.github.Rajveer_Mahida.Hangar"
 STAGE="$(mktemp -d)"
 trap 'rm -rf "$STAGE"' EXIT
@@ -15,9 +15,9 @@ install -d "$ROOT/DEBIAN" "$ROOT/usr/bin" "$ROOT/usr/share/hangar" "$ROOT/usr/li
     "$ROOT/usr/share/icons/hicolor/symbolic/apps" "$ROOT/usr/share/metainfo" "$ROOT/usr/share/polkit-1/actions" \
     "$ROOT/usr/share/doc/hangar"
 
-cp -r "$SRC/uam" "$ROOT/usr/share/hangar/uam"
+cp -r "$SRC/hangar" "$ROOT/usr/share/hangar/hangar"
 find "$ROOT/usr/share/hangar" -name '__pycache__' -prune -exec rm -rf {} +
-install -m 0755 "$SRC/uam/helper/uam_helper.py" "$ROOT$HELPER"
+install -m 0755 "$SRC/hangar/helper/hangar_helper.py" "$ROOT$HELPER"
 install -m 0755 "$SRC/bin/hangar" "$ROOT/usr/bin/hangar"
 install -m 0644 "$SRC/data/$APP_ID.desktop" "$ROOT/usr/share/applications/"
 install -m 0644 "$SRC/data/icons/hicolor/scalable/apps/$APP_ID.svg" "$ROOT/usr/share/icons/hicolor/scalable/apps/"

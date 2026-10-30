@@ -1,5 +1,5 @@
 # Test on every push and pull request, build the .deb, and publish a GitHub release for
-# version tags (v1.2.3). To release: bump uam.VERSION, add a <release> entry to the
+# version tags (v1.2.3). To release: bump hangar.VERSION, add a <release> entry to the
 # metainfo, commit, then `git tag -a v1.2.3 -m "Hangar 1.2.3" && git push origin v1.2.3`.
 # "Run workflow" (workflow_dispatch) releases a tag that was pushed before this workflow existed.
 name: CI
@@ -66,7 +66,7 @@ jobs:
           ref: ${{ env.CHECKOUT_REF }}
       - name: Read version
         id: version
-        run: echo "version=$(python3 -c 'import uam; print(uam.VERSION)')" >> "$GITHUB_OUTPUT"
+        run: echo "version=$(python3 -c 'import hangar; print(hangar.VERSION)')" >> "$GITHUB_OUTPUT"
       - name: Check that the tag matches the version
         if: startsWith(env.CHECKOUT_REF, 'refs/tags/') || github.event_name == 'workflow_dispatch'
         env:
@@ -74,7 +74,7 @@ jobs:
           VERSION: ${{ steps.version.outputs.version }}
         run: |
           if [ "$TAG" != "v$VERSION" ]; then
-            echo "::error::Tag $TAG does not match uam.VERSION $VERSION (expected v$VERSION)"
+            echo "::error::Tag $TAG does not match hangar.VERSION $VERSION (expected v$VERSION)"
             exit 1
           fi
       - name: Build

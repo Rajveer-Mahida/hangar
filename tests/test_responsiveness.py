@@ -4,11 +4,11 @@ import threading
 
 from gi.repository import GLib
 
-from uam.core.application_model import AppRecord, Confidence, PackageManager, Source
-from uam.core.database import Database
-from uam.core.inventory import Inventory
-from uam.core.scanner import ScanResult
-from uam.core.settings import Settings
+from hangar.core.application_model import AppRecord, Confidence, PackageManager, Source
+from hangar.core.database import Database
+from hangar.core.inventory import Inventory
+from hangar.core.scanner import ScanResult
+from hangar.core.settings import Settings
 
 
 def rec(key):
@@ -54,7 +54,7 @@ class FakePage:
     """Minimal stand-in for a Gtk widget using the LazyRefresh mixin."""
 
     def __init__(self):
-        from uam.ui.widgets import LazyRefresh
+        from hangar.ui.widgets import LazyRefresh
 
         self.__class__ = type("Page", (FakePage, LazyRefresh), {})
         self.mapped = False
@@ -80,7 +80,7 @@ def drain():
 
 
 def test_hidden_pages_do_not_rebuild_until_shown():
-    import uam.ui  # noqa: F401  (GI versions)
+    import hangar.ui  # noqa: F401  (GI versions)
 
     page = FakePage()
     for _ in range(5):
@@ -94,7 +94,7 @@ def test_hidden_pages_do_not_rebuild_until_shown():
 
 
 def test_bursts_of_changes_rebuild_visible_page_once():
-    import uam.ui  # noqa: F401
+    import hangar.ui  # noqa: F401
 
     page = FakePage()
     page.mapped = True

@@ -1,7 +1,7 @@
 """Grouping of the same application installed through several sources."""
 
-from uam.core.application_model import AppRecord, Confidence, PackageManager, Source
-from uam.core.duplicate_detector import assign_groups, identity_tokens, pick_primary
+from hangar.core.application_model import AppRecord, Confidence, PackageManager, Source
+from hangar.core.duplicate_detector import assign_groups, identity_tokens, pick_primary
 
 
 def rec(key, name, source, pm, package="", desktop_id="", exec_path="", **kw):

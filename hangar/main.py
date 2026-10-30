@@ -16,7 +16,7 @@ def main(argv: list[str] | None = None) -> int:
     gi.require_version("Graphene", "1.0")
     gi.require_version("Gsk", "4.0")
 
-    logging.basicConfig(level=os.environ.get("UAM_LOG_LEVEL", "WARNING"),
+    logging.basicConfig(level=os.environ.get("HANGAR_LOG_LEVEL", "WARNING"),
                         format="%(levelname)s %(name)s: %(message)s")
     if os.geteuid() == 0:
         from . import APP_NAME

@@ -28,7 +28,7 @@ def apply_theme(theme: str) -> None:
 
 
 class SettingsPage(Gtk.Box):
-    __gtype_name__ = "UamSettingsPage"
+    __gtype_name__ = "HangarSettingsPage"
 
     def __init__(self, controller: AppController, window):
         super().__init__(orientation=Gtk.Orientation.VERTICAL)

@@ -1,7 +1,7 @@
 """Locating the privileged helper and building pkexec argument vectors.
 
 Administrative operations always go through ``pkexec`` (PolicyKit) and the
-helper in ``uam/helper/uam_helper.py``; the application itself never runs as
+helper in ``hangar/helper/hangar_helper.py``; the application itself never runs as
 root and never builds shell strings.
 """
 
@@ -13,17 +13,17 @@ import pwd
 import shutil
 import stat
 
-from ..helper import uam_helper
+from ..helper import hangar_helper
 
 INSTALLED_HELPER_PATHS = (
     "/usr/libexec/hangar/hangar-helper",
     "/usr/local/libexec/hangar/hangar-helper",
 )
-DEV_HELPER_PATH = os.path.abspath(uam_helper.__file__)
+DEV_HELPER_PATH = os.path.abspath(hangar_helper.__file__)
 POLKIT_ACTION_PREFIX = "io.github.Rajveer_Mahida.Hangar."
 # Development mode (running the in-tree helper through pkexec) must be requested
 # explicitly; ./run.sh sets this. Installed copies never fall back to it.
-DEV_MODE_ENV = "UAM_DEV_HELPER"
+DEV_MODE_ENV = "HANGAR_DEV_HELPER"
 
 # pkexec exit statuses
 PKEXEC_DISMISSED = 126
@@ -107,8 +107,8 @@ def helper_status() -> dict[str, str | bool]:
 def validate_request(verb: str, args: list[str]) -> None:
     """Run the helper's own validation before asking for a password."""
     try:
-        uam_helper.build(verb, list(args))
-    except uam_helper.HelperError as exc:
+        hangar_helper.build(verb, list(args))
+    except hangar_helper.HelperError as exc:
         raise PrivilegeError(str(exc)) from exc
     except OSError as exc:
         raise PrivilegeError(exc.strerror or str(exc)) from exc

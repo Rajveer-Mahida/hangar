@@ -21,7 +21,7 @@ SORT_MODES = [("name", "Name"), ("date", "Installation date"), ("source", "Packa
 
 
 class AppItem(GObject.Object):
-    __gtype_name__ = "UamAppItem"
+    __gtype_name__ = "HangarAppItem"
 
     def __init__(self, record: AppRecord, update: UpdateInfo | None, installations: int):
         super().__init__()
@@ -188,7 +188,7 @@ class _GridTile(Gtk.Overlay):
 
 
 class ApplicationsPage(Gtk.Box, LazyRefresh):
-    __gtype_name__ = "UamApplicationsPage"
+    __gtype_name__ = "HangarApplicationsPage"
     __gsignals__ = {
         "show-app": (GObject.SignalFlags.RUN_FIRST, None, (str,)),
         "uninstall-apps": (GObject.SignalFlags.RUN_FIRST, None, (object,)),

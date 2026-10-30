@@ -6,4 +6,4 @@ PREFIX="$(dirname "$(dirname "$SELF")")"
 APPDIR="$PREFIX/share/hangar"
 export PYTHONPATH="$APPDIR${PYTHONPATH:+:$PYTHONPATH}"
 # -P: never put the current directory on sys.path (it could shadow the package).
-exec /usr/bin/python3 -P -m uam "$@"
+exec /usr/bin/python3 -P -m hangar "$@"

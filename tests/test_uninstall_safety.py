@@ -9,18 +9,18 @@ import textwrap
 import pytest
 from conftest import ROOT, make_appimage, write_desktop, write_exec
 
-from uam import APP_ID
-from uam.core import safety
-from uam.core.application_model import AppRecord, Confidence, PackageManager, Source
-from uam.helper import uam_helper
-from uam.services import privilege_service, uninstall_service
-from uam.services.operation_service import CommandStep, PythonStep
-from uam.services.uninstall_service import UninstallPlan, build_plan, operations_for
+from hangar import APP_ID
+from hangar.core import safety
+from hangar.core.application_model import AppRecord, Confidence, PackageManager, Source
+from hangar.helper import hangar_helper
+from hangar.services import privilege_service, uninstall_service
+from hangar.services.operation_service import CommandStep, PythonStep
+from hangar.services.uninstall_service import UninstallPlan, build_plan, operations_for
 
 
 @pytest.fixture(autouse=True)
 def fake_pkexec(monkeypatch):
-    monkeypatch.setenv("UAM_DEV_HELPER", "1")
+    monkeypatch.setenv("HANGAR_DEV_HELPER", "1")
     monkeypatch.setattr(privilege_service.shutil, "which", lambda name: f"/usr/bin/{name}")
     monkeypatch.setattr(privilege_service, "installed_helper", lambda: None)
     monkeypatch.setattr(uninstall_service, "_dpkg_owner", lambda path: None)
@@ -36,7 +36,7 @@ def fake_pkexec(monkeypatch):
 ])
 def test_system_paths_are_protected(path, fake_home):
     assert safety.removal_problem(path, str(fake_home)) is not None
-    assert uam_helper.system_removal_problem(path) is not None
+    assert hangar_helper.system_removal_problem(path) is not None
 
 
 @pytest.mark.parametrize("rel", ["", ".local", ".local/share", ".local/share/applications", ".config",
@@ -51,8 +51,8 @@ def test_home_and_sensitive_paths_are_protected(rel, fake_home):
 @pytest.mark.parametrize("bad", ["relative/path", "/opt/../etc", "/opt//x", "/opt/x/", "/opt/x\n", "/opt/\x00x"])
 def test_malformed_paths_rejected(bad, fake_home):
     assert safety.removal_problem(bad, str(fake_home)) is not None
-    with pytest.raises(uam_helper.HelperError):
-        uam_helper.build("remove-paths", [bad])
+    with pytest.raises(hangar_helper.HelperError):
+        hangar_helper.build("remove-paths", [bad])
 
 
 def test_user_app_folder_is_removable(fake_home):
@@ -87,7 +87,7 @@ def test_shared_libraries_refused_outside_home(tmp_path, monkeypatch):
 
 
 def test_helper_never_removes_home_files():
-    assert "home" in uam_helper.system_removal_problem("/home/someone/file")
+    assert "home" in hangar_helper.system_removal_problem("/home/someone/file")
 
 
 def test_helper_rejects_injection_and_unknown_verbs():
@@ -98,26 +98,26 @@ def test_helper_rejects_injection_and_unknown_verbs():
         ("apt-update", ["extra"]), ("apt-install-deb", ["/etc/passwd"]), ("sh", ["-c", "id"]),
     ]
     for verb, args in bad_requests:
-        with pytest.raises((uam_helper.HelperError, OSError)):
-            uam_helper.build(verb, args)
+        with pytest.raises((hangar_helper.HelperError, OSError)):
+            hangar_helper.build(verb, args)
 
 
 def test_helper_builds_argument_vectors():
-    kind, argv = uam_helper.build("apt-upgrade", ["firefox", "libfoo:i386"])
+    kind, argv = hangar_helper.build("apt-upgrade", ["firefox", "libfoo:i386"])
     assert kind == "apt-upgrade" and argv[0] == "apt-get" and argv[-2:] == ["firefox", "libfoo:i386"]
     assert "--no-remove" in argv  # upgrades never remove packages
-    kind, payload = uam_helper.build("apt-remove", ["--purge", "--expect=a,b", "a"])
+    kind, payload = hangar_helper.build("apt-remove", ["--purge", "--expect=a,b", "a"])
     assert kind == "apt-remove" and payload == (["a"], True, ["a", "b"], [])
-    kind, argv = uam_helper.build("apt-install", ["hello"])
+    kind, argv = hangar_helper.build("apt-install", ["hello"])
     assert "--no-remove" in argv
-    kind, argv = uam_helper.build("snap-install", ["--classic", "code"])
+    kind, argv = hangar_helper.build("snap-install", ["--classic", "code"])
     assert argv == ["snap", "install", "--classic", "code"]
 
 
 def test_helper_requires_root():
     if os.geteuid() == 0:
         pytest.skip("running as root")
-    assert uam_helper.main(["uam-helper", "apt-update"]) == uam_helper.EXIT_NOT_ROOT
+    assert hangar_helper.main(["hangar-helper", "apt-update"]) == hangar_helper.EXIT_NOT_ROOT
 
 
 # -- plans ------------------------------------------------------------------------------------
@@ -248,7 +248,7 @@ def test_trash_execution_end_to_end(tmp_path):
     script = textwrap.dedent(f"""
         import json, sys
         sys.path.insert(0, {ROOT!r})
-        from uam.services.uninstall_service import trash_paths
+        from hangar.services.uninstall_service import trash_paths
         out = {{"log": []}}
         try:
             trash_paths([{str(target)!r}, {str(keep)!r}], out["log"].append)
@@ -274,18 +274,18 @@ def test_trash_execution_end_to_end(tmp_path):
 def test_apt_action_suffixes_are_rejected(name):
     with pytest.raises(safety.ValidationError):
         safety.validate_apt_package(name)
-    with pytest.raises(uam_helper.HelperError):
-        uam_helper.build("apt-upgrade", [name])
+    with pytest.raises(hangar_helper.HelperError):
+        hangar_helper.build("apt-upgrade", [name])
 
 
 def test_double_plus_package_names_are_allowed():
     assert safety.validate_apt_package("g++") == "g++"
-    uam_helper.build("apt-install", ["g++"])
+    hangar_helper.build("apt-install", ["g++"])
 
 
 def test_apt_remove_requires_expectation():
-    with pytest.raises(uam_helper.HelperError):
-        uam_helper.build("apt-remove", ["foo"])
+    with pytest.raises(hangar_helper.HelperError):
+        hangar_helper.build("apt-remove", ["foo"])
 
 
 def test_non_image_icon_paths_are_never_offered(fake_home):
@@ -298,8 +298,8 @@ def test_non_image_icon_paths_are_never_offered(fake_home):
 
 
 def test_system_icon_trees_only_accept_image_files():
-    assert uam_helper.system_removal_problem("/usr/share/icons/hicolor/48x48/apps") is not None
-    assert "icon" in (uam_helper.system_removal_problem("/usr/share/icons/hicolor/index.theme") or "icon")
+    assert hangar_helper.system_removal_problem("/usr/share/icons/hicolor/48x48/apps") is not None
+    assert "icon" in (hangar_helper.system_removal_problem("/usr/share/icons/hicolor/index.theme") or "icon")
 
 
 def test_folder_guessed_from_script_is_not_preselected(fake_home):
@@ -335,29 +335,29 @@ def test_helper_copies_and_verifies_installed_files(tmp_path):
     deb = tmp_path / "pkg.deb"
     deb.write_bytes(b"debian package bytes")
     digest = hashlib.sha256(deb.read_bytes()).hexdigest()
-    workdir, copy = uam_helper.copy_verified(str(deb), digest, ".deb")
+    workdir, copy = hangar_helper.copy_verified(str(deb), digest, ".deb")
     try:
         assert open(copy, "rb").read() == deb.read_bytes() and copy != str(deb)
     finally:
         import shutil
 
         shutil.rmtree(workdir)
-    with pytest.raises(uam_helper.HelperError) as exc:
-        uam_helper.copy_verified(str(deb), "0" * 64, ".deb")       # file changed after review
-    assert exc.value.code == uam_helper.EXIT_PLAN_CHANGED
+    with pytest.raises(hangar_helper.HelperError) as exc:
+        hangar_helper.copy_verified(str(deb), "0" * 64, ".deb")       # file changed after review
+    assert exc.value.code == hangar_helper.EXIT_PLAN_CHANGED
     link = tmp_path / "link.deb"
     link.symlink_to(deb)
     with pytest.raises(OSError):
-        uam_helper.copy_verified(str(link), digest, ".deb")        # symlinks are not followed
+        hangar_helper.copy_verified(str(link), digest, ".deb")        # symlinks are not followed
 
 
 def test_flatpakref_must_use_https(tmp_path):
     ref = tmp_path / "app.flatpakref"
     ref.write_text("[Flatpak Ref]\nName=org.example.App\nUrl=http://insecure.example/repo\n")
-    with pytest.raises(uam_helper.HelperError):
-        uam_helper.validate_flatpakref(str(ref))
+    with pytest.raises(hangar_helper.HelperError):
+        hangar_helper.validate_flatpakref(str(ref))
     ref.write_text("[Flatpak Ref]\nName=org.example.App\nUrl=https://dl.example/repo\n")
-    uam_helper.validate_flatpakref(str(ref))
+    hangar_helper.validate_flatpakref(str(ref))
 
 
 def test_every_helper_verb_has_its_own_polkit_action():
@@ -370,7 +370,7 @@ def test_every_helper_verb_has_its_own_polkit_action():
         annotations = {a.getAttribute("key"): a.firstChild.data for a in action.getElementsByTagName("annotate")}
         active = action.getElementsByTagName("allow_active")[0].firstChild.data
         actions[annotations["org.freedesktop.policykit.exec.argv1"]] = active
-    source = open(uam_helper.__file__).read()
+    source = open(hangar_helper.__file__).read()
     verbs = set(re.findall(r'verb == "([a-z-]+)"', source)) | {"snap-remove", "snap-install"}
     assert verbs == set(actions)
     kept = {v for v, a in actions.items() if a == "auth_admin_keep"}
@@ -378,7 +378,7 @@ def test_every_helper_verb_has_its_own_polkit_action():
 
 
 def test_history_never_stores_unmatched_command_output():
-    from uam.services.process_service import explain_failure
+    from hangar.services.process_service import explain_failure
 
     tail = ["E: Failed to fetch https://user:token@private.example/repo/Packages 401 Unauthorized"]
     assert "token" not in explain_failure(100, tail, privileged=True, include_output=False)

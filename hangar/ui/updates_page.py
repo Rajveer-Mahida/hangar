@@ -12,7 +12,7 @@ from .widgets import LazyRefresh, app_image, clear_box, esc, pill, relative_time
 
 
 class UpdatesPage(Gtk.Box, LazyRefresh):
-    __gtype_name__ = "UamUpdatesPage"
+    __gtype_name__ = "HangarUpdatesPage"
     __gsignals__ = {
         "update-request": (GObject.SignalFlags.RUN_FIRST, None, (object, bool)),
         "github-update": (GObject.SignalFlags.RUN_FIRST, None, (object,)),

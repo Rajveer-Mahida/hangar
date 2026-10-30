@@ -12,7 +12,7 @@ import xml.etree.ElementTree as ET
 SRC = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, SRC)
 
-from uam import APP_ID, VERSION  # noqa: E402
+from hangar import APP_ID, VERSION  # noqa: E402
 
 METAINFO = os.path.join(SRC, "data", f"{APP_ID}.metainfo.xml")
 

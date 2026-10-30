@@ -8,7 +8,7 @@ from ..services.operation_service import Operation, OperationManager
 
 
 class OperationBar(Gtk.Revealer):
-    __gtype_name__ = "UamOperationBar"
+    __gtype_name__ = "HangarOperationBar"
 
     def __init__(self, manager: OperationManager):
         super().__init__(transition_type=Gtk.RevealerTransitionType.SLIDE_UP, reveal_child=False)
