@@ -6,5 +6,5 @@ APP_NAME = "Hangar App Manager"   # launcher, search, window title, About
 APP_SHORT_NAME = "Hangar"          # tight spots such as the sidebar header
 APP_SLUG = "hangar"            # command, package and data-folder name
 LEGACY_SLUG = "unified-app-manager"
-VERSION = "1.0.0"
+VERSION = "1.0.1"
 HOMEPAGE = "https://github.com/Rajveer-Mahida/hangar"

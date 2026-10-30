@@ -135,6 +135,50 @@ def is_status_line(line: str) -> bool:
     return bool(_APT_STATUS.match(line))
 
 
+_DPKG_ERROR = re.compile(r"^dpkg: error processing (?:package|archive) \S+ \(--\w+\):$")
+_DPKG_RETRY = ("Other updates may have been applied. Run 'sudo dpkg --configure -a' in a terminal "
+               "to retry and see the full error.")
+
+
+def _explain_dpkg_failure(tail: list[str], include_output: bool) -> str:
+    if not include_output:
+        return f"dpkg could not finish installing some packages. {_DPKG_RETRY}"
+    lines = [line.rstrip() for line in tail]
+    names: list[str] = []
+    reason = ""
+    for i, line in enumerate(lines):
+        nxt = lines[i + 1] if i + 1 < len(lines) else ""
+        if not reason and _DPKG_ERROR.match(line) and nxt.startswith(" "):
+            reason = nxt.strip()
+        if line == "Errors were encountered while processing:":
+            names = []
+            for item in lines[i + 1:]:
+                if not item.startswith(" "):
+                    break
+                names.append(item.strip())
+    shown = ", ".join(names[:5]) + (f" and {len(names) - 5} more" if len(names) > 5 else "")
+    message = f"dpkg could not finish installing: {shown}." if shown else "dpkg could not finish installing."
+    if reason:
+        message += f"\n\nFirst error: {reason}."
+    return f"{message}\n\n{_DPKG_RETRY}"
+
+
+_SNAP_BUSY = re.compile(r'snap "([^"]+)" has running apps')
+
+
+def _explain_busy_snaps(tail: list[str], include_output: bool) -> str:
+    # snapd refreshes each snap of a batch in its own transaction, so only the open ones failed.
+    others = "Other snaps in the same update are refreshed separately and were not held back."
+    names = list(dict.fromkeys(m.group(1) for line in tail for m in _SNAP_BUSY.finditer(line)))
+    if not include_output or not names:
+        return f"A snap could not be updated because it was running. Close it and try again.\n\n{others}"
+    if len(names) == 1:
+        return (f"{names[0]} is running, and snaps can't be updated while they're open. "
+                f"Close {names[0]} and update it again.\n\n{others}")
+    return (f"These snaps are running and can't be updated while they're open: {', '.join(names)}. "
+            f"Close them and update them again.\n\n{others}")
+
+
 _ERROR_PATTERNS = [
     (re.compile(r"Could not get lock|Unable to acquire the dpkg frontend lock|is another process using it", re.I),
      "Another package manager is running (for example Software Updater or unattended upgrades). "
@@ -149,6 +193,10 @@ _ERROR_PATTERNS = [
      "A network error occurred. Check your internet connection and try again."),
     (re.compile(r"No space left on device|not enough free space", re.I),
      "There is not enough free disk space."),
+    # A package script or unpack failed. apt's last line ("Sub-process /usr/bin/dpkg returned an
+    # error code (1)") says nothing useful, so the message is built from dpkg's own lines.
+    (re.compile(r"^Errors were encountered while processing:", re.M), _explain_dpkg_failure),
+    (_SNAP_BUSY, _explain_busy_snaps),
     (re.compile(r"has running apps|is running", re.I),
      "The application is currently running. Close it and try again."),
     (re.compile(r"packages that would be removed changed since the preview", re.I),
@@ -179,7 +227,7 @@ def explain_failure(exit_code: int, tail: list[str], privileged: bool, include_o
     text = "\n".join(tail[-60:])
     for pattern, message in _ERROR_PATTERNS:
         if pattern.search(text):
-            return message
+            return message(tail[-60:], include_output) if callable(message) else message
     if not include_output:
         return f"The operation failed (exit status {exit_code})."
     for line in reversed(tail):

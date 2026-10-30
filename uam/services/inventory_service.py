@@ -20,9 +20,12 @@ from ..core.inventory import Inventory
 from ..core.scanner import Scanner
 from ..core.settings import Settings
 from .operation_service import Operation, OperationManager
-from .update_service import UPDATE_SOURCES, check_updates
+from .update_service import SOURCE_LABELS, UPDATE_SOURCES, check_updates
 
 log = logging.getLogger(__name__)
+
+# Operation.source holds the display label ("Snap"); update checks take the key ("snap").
+_SOURCE_KEYS = {label: key for key, label in SOURCE_LABELS.items()}
 
 
 class AppController(GObject.Object):
@@ -225,6 +228,10 @@ class AppController(GObject.Object):
 
     def _on_operation_finished(self, _manager, op: Operation) -> None:
         self.emit("history-changed")
+        if op.status == "failed" and op.kind == "update" and op.source in _SOURCE_KEYS:
+            # Part of a failed batch may have gone through (snapd refreshes each snap on its own,
+            # dpkg sets up every package it can), so ask the source again instead of guessing.
+            self.check_updates([_SOURCE_KEYS[op.source]], quiet=True)
         if op.status != "success":
             return
         if op.kind == "remove":

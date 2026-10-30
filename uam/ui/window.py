@@ -290,8 +290,26 @@ class MainWindow(Adw.ApplicationWindow):
         self.toasts.add_toast(toast)
         return toast
 
-    def show_error(self, heading: str, body: str) -> None:
+    def show_error(self, heading: str, body: str, output: list[str] | None = None) -> None:
         dialog = Adw.AlertDialog(heading=heading, body=body)
+        if output:
+            # Keep the command output with the error: the operation bar moves on to the next
+            # queued operation, so its log is gone by the time the user opens this dialog.
+            view = Gtk.TextView(editable=False, cursor_visible=False, monospace=True,
+                                wrap_mode=Gtk.WrapMode.WORD_CHAR)
+            view.add_css_class("operation-log")
+            view.get_buffer().set_text("\n".join(output[-200:]))
+            scroller = Gtk.ScrolledWindow(min_content_height=180, max_content_height=320,
+                                          propagate_natural_height=True, child=view)
+            expander = Gtk.Expander(label="Command output", child=scroller)
+
+            def scroll_to_end(*_args) -> bool:
+                buf = view.get_buffer()
+                view.scroll_mark_onscreen(buf.create_mark(None, buf.get_end_iter(), False))
+                return False
+
+            expander.connect("notify::expanded", lambda *_: GLib.idle_add(scroll_to_end))
+            dialog.set_extra_child(expander)
         dialog.add_response("close", "Close")
         dialog.present(self)
 
@@ -309,7 +327,7 @@ class MainWindow(Adw.ApplicationWindow):
         elif op.status == "failed":
             toast = self.toast(f"{op.title} failed", timeout=8)
             toast.set_button_label("Details")
-            toast.connect("button-clicked", lambda *_: self.show_error(f"{op.title} failed", op.error))
+            toast.connect("button-clicked", lambda *_: self.show_error(f"{op.title} failed", op.error, list(op.log)))
 
     # -- app actions -------------------------------------------------------------------------
     def launch(self, record: AppRecord) -> None:

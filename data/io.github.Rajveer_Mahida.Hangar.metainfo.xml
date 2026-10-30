@@ -24,6 +24,17 @@
   <launchable type="desktop-id">io.github.Rajveer_Mahida.Hangar.desktop</launchable>
   <content_rating type="oars-1.1"/>
   <releases>
+    <release version="1.0.1" date="2026-10-30">
+      <description>
+        <p>Clearer errors when updates fail:</p>
+        <ul>
+          <li>When dpkg cannot set up a package, the error names the package and shows dpkg's reason instead of a generic "returned an error code (1)".</li>
+          <li>When a snap is open during an update, the error names it. Other snaps in the same update still update.</li>
+          <li>Error dialogs include the command output, even after the next operation has started.</li>
+          <li>After a failed update the list of updates is checked again, so updates that did go through are no longer shown.</li>
+        </ul>
+      </description>
+    </release>
     <release version="1.0.0" date="2026-10-30">
       <description>
         <p>First public release.</p>

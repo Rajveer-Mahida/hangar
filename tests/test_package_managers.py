@@ -185,6 +185,63 @@ def test_explain_failure_messages():
     assert "exit status 3" in explain_failure(3, ["something odd"], privileged=False)
 
 
+DPKG_FAILURE = [
+    "Setting up google-chrome-stable (156.0.8078.79-1) ...",
+    "dpkg: error processing package google-chrome-stable (--configure):",
+    " installed google-chrome-stable package post-installation script subprocess returned error exit status 1",
+    "dpkg: dependency problems prevent configuration of chrome-addon:",
+    " chrome-addon depends on google-chrome-stable; however:",
+    "  Package google-chrome-stable is not configured yet.",
+    "Setting up brave-origin (1.98.62) ...",
+    "Errors were encountered while processing:",
+    " google-chrome-stable",
+    " chrome-addon",
+    "Error: Sub-process /usr/bin/dpkg returned an error code (1)",
+]
+
+
+def test_explain_failure_names_packages_dpkg_could_not_set_up():
+    message = explain_failure(100, DPKG_FAILURE, privileged=True)
+    assert "google-chrome-stable" in message and "chrome-addon" in message
+    assert "post-installation script" in message      # dpkg's reason for the first package
+    assert "sudo dpkg --configure -a" in message
+    assert "not installed" not in message              # not mistaken for a missing package
+    # apt 2.x prints "E:" instead of "Error:"; same result.
+    old_apt = [line.replace("Error: ", "E: ") for line in DPKG_FAILURE]
+    assert explain_failure(100, old_apt, privileged=True) == message
+
+
+def test_dpkg_failure_history_message_has_no_output():
+    message = explain_failure(100, DPKG_FAILURE, privileged=True, include_output=False)
+    assert "google-chrome-stable" not in message
+    assert "sudo dpkg --configure -a" in message
+
+
+SNAP_BUSY = [
+    "error: cannot perform the following tasks:",
+    '- Make current revision for snap "brave" unavailable (snap "brave" has running apps (brave), pids: 4242)',
+    '- Make current revision for snap "thunderbird" unavailable (snap "thunderbird" has running apps '
+    '(thunderbird), pids: 5151,5152)',
+]
+
+
+def test_running_snaps_are_named_and_others_not_blamed():
+    message = explain_failure(1, SNAP_BUSY, privileged=True)
+    assert "brave" in message and "thunderbird" in message
+    assert "4242" not in message
+    assert "other snaps" in message.lower()
+    history = explain_failure(1, SNAP_BUSY, privileged=True, include_output=False)
+    assert "brave" not in history and "running" in history
+
+
+def test_disk_full_wins_over_dpkg_failure():
+    tail = ["dpkg: error processing archive /var/cache/apt/archives/foo.deb (--unpack):",
+            " cannot copy extracted data for './usr/bin/foo': failed to write (No space left on device)",
+            "Errors were encountered while processing:", " /var/cache/apt/archives/foo.deb",
+            "E: Sub-process /usr/bin/dpkg returned an error code (1)"]
+    assert "disk space" in explain_failure(100, tail, privileged=True)
+
+
 def test_helper_argv_uses_pkexec_and_argument_arrays(monkeypatch):
     monkeypatch.setenv("UAM_DEV_HELPER", "1")
     monkeypatch.setattr(privilege_service.shutil, "which", lambda name: f"/usr/bin/{name}")
