@@ -11,6 +11,8 @@
   <a href="#requirements"><img alt="GNOME" src="https://img.shields.io/badge/GNOME-4A86CF?style=for-the-badge&amp;logo=gnome&amp;logoColor=white"></a>
   <a href="#requirements"><img alt="GTK 4 + libadwaita" src="https://img.shields.io/badge/GTK_4_+_libadwaita-4E9A06?style=for-the-badge&amp;logo=gtk&amp;logoColor=white"></a>
   <a href="#requirements"><img alt="Python 3.12" src="https://img.shields.io/badge/Python_3.12-3776AB?style=for-the-badge&amp;logo=python&amp;logoColor=white"></a>
+  <a href="https://github.com/Rajveer-Mahida/hangar/actions/workflows/ci.yml"><img alt="CI status" src="https://img.shields.io/github/actions/workflow/status/Rajveer-Mahida/hangar/ci.yml?branch=main&amp;style=for-the-badge&amp;logo=githubactions&amp;logoColor=white&amp;label=CI"></a>
+  <a href="https://github.com/Rajveer-Mahida/hangar/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/Rajveer-Mahida/hangar?style=for-the-badge&amp;logo=github&amp;logoColor=white&amp;color=181717"></a>
   <a href="LICENSE"><img alt="License: GPL-3.0-or-later" src="https://img.shields.io/badge/GPL--3.0-A42E2B?style=for-the-badge&amp;logo=gnu&amp;logoColor=white"></a>
 </p>
 
@@ -263,10 +265,34 @@ uam/
 ├── ui/                       window, pages, dialogs, widgets
 └── resources/styles/         stylesheets (light and dark)
 data/                         .desktop launcher, AppStream metainfo, PolicyKit policy template, icons
-scripts/                      install-deps, install, uninstall, build-deb, dev_screenshot
+scripts/                      install-deps, install, uninstall, build-deb, release-notes, dev_screenshot
+.github/workflows/ci.yml      tests, .deb build and GitHub releases
 packaging/                    notes on building a proper Debian source package
 tests/                        pytest suite
 ```
+
+### CI and releases
+
+[GitHub Actions](.github/workflows/ci.yml) runs on every push and pull request:
+
+1. **Test**: the test suite plus desktop-entry and AppStream validation, on Ubuntu 24.04 and 26.04.
+2. **Build**: `scripts/build-deb.sh`, with a `SHA256SUMS` file. The `.deb` is kept as a workflow artifact.
+3. **Install test**: installs the `.deb` with apt on clean Ubuntu 24.04 and 26.04 and starts it.
+4. **Release**: only for `v*` tags. Publishes a GitHub release with the `.deb` and `SHA256SUMS`.
+
+To release a new version:
+
+```bash
+# 1. set VERSION in uam/__init__.py, e.g. 1.2.0
+# 2. add <release version="1.2.0" date="YYYY-MM-DD"> with notes to data/*.metainfo.xml
+git commit -am "Hangar 1.2.0: ..."
+git tag -a v1.2.0 -m "Hangar 1.2.0"
+git push origin main v1.2.0
+```
+
+The release notes come from the metainfo entry (`scripts/release-notes.py`). The build fails if the tag
+doesn't match `VERSION`. To release a tag that was pushed before CI existed, open
+**Actions → CI → Run workflow** and enter the tag.
 
 See [packaging/PACKAGING.md](packaging/PACKAGING.md) for the road from the current binary `.deb` to a
 Debian source package and a PPA.

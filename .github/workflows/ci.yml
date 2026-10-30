@@ -1,0 +1,153 @@
+# Test on every push and pull request, build the .deb, and publish a GitHub release for
+# version tags (v1.2.3). To release: bump uam.VERSION, add a <release> entry to the
+# metainfo, commit, then `git tag -a v1.2.3 -m "Hangar 1.2.3" && git push origin v1.2.3`.
+# "Run workflow" (workflow_dispatch) releases a tag that was pushed before this workflow existed.
+name: CI
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing tag to release, for example v1.0.1"
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}-${{ inputs.tag }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  # The commit or tag to work on: the dispatched tag, otherwise the pushed ref.
+  CHECKOUT_REF: ${{ inputs.tag || github.ref }}
+
+jobs:
+  test:
+    name: Test (Ubuntu ${{ matrix.ubuntu }})
+    runs-on: ubuntu-latest
+    container: ubuntu:${{ matrix.ubuntu }}
+    strategy:
+      fail-fast: false
+      matrix:
+        ubuntu: ["24.04", "26.04"]
+    env:
+      DEBIAN_FRONTEND: noninteractive
+    steps:
+      - name: Install dependencies
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends ca-certificates git python3 python3-gi \
+            gir1.2-gtk-4.0 gir1.2-adw-1 gir1.2-appstream-1.0 python3-apt python3-pytest \
+            appstream desktop-file-utils xvfb xauth
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CHECKOUT_REF }}
+      - name: Run tests
+        run: xvfb-run -a python3 -m pytest -q tests
+      - name: Validate desktop entry and AppStream metadata
+        run: |
+          desktop-file-validate data/*.desktop
+          appstreamcli validate --no-net data/*.metainfo.xml
+
+  build:
+    name: Build .deb
+    needs: test
+    runs-on: ubuntu-24.04
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CHECKOUT_REF }}
+      - name: Read version
+        id: version
+        run: echo "version=$(python3 -c 'import uam; print(uam.VERSION)')" >> "$GITHUB_OUTPUT"
+      - name: Check that the tag matches the version
+        if: startsWith(env.CHECKOUT_REF, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+        env:
+          TAG: ${{ inputs.tag || github.ref_name }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          if [ "$TAG" != "v$VERSION" ]; then
+            echo "::error::Tag $TAG does not match uam.VERSION $VERSION (expected v$VERSION)"
+            exit 1
+          fi
+      - name: Build
+        run: ./scripts/build-deb.sh
+      - name: Checksums
+        run: cd dist && sha256sum -- *.deb > SHA256SUMS && cat SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hangar-deb
+          path: |
+            dist/*.deb
+            dist/SHA256SUMS
+          if-no-files-found: error
+
+  install-test:
+    name: Install .deb (Ubuntu ${{ matrix.ubuntu }})
+    needs: build
+    runs-on: ubuntu-latest
+    container: ubuntu:${{ matrix.ubuntu }}
+    strategy:
+      fail-fast: false
+      matrix:
+        ubuntu: ["24.04", "26.04"]
+    env:
+      DEBIAN_FRONTEND: noninteractive
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: hangar-deb
+          path: dist
+      - name: Install with apt (resolves the package dependencies)
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends ./dist/hangar_*_all.deb xvfb xauth
+      - name: Smoke test
+        run: |
+          (cd dist && sha256sum -c SHA256SUMS)
+          # The app refuses to run as root, and container jobs run as root.
+          useradd -m tester
+          runuser -u tester -- xvfb-run -a hangar --help
+          # The helper is root-only: it must run, and reject a verb it does not know.
+          out="$(/usr/libexec/hangar/hangar-helper no-such-verb 2>&1)" && exit 1
+          echo "$out" | grep -q "unknown verb"
+          test -f /usr/share/polkit-1/actions/io.github.Rajveer_Mahida.Hangar.policy
+          test -f /usr/share/applications/io.github.Rajveer_Mahida.Hangar.desktop
+
+  release:
+    name: Publish GitHub release
+    needs: [build, install-test]
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      TAG: ${{ inputs.tag || github.ref_name }}
+      VERSION: ${{ needs.build.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CHECKOUT_REF }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: hangar-deb
+          path: dist
+      - name: Release notes
+        run: ./scripts/release-notes.py "$VERSION" > notes.md && cat notes.md
+      - name: Create or update the release
+        run: |
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            gh release upload "$TAG" dist/*.deb dist/SHA256SUMS --clobber
+          else
+            gh release create "$TAG" dist/*.deb dist/SHA256SUMS --verify-tag \
+              --title "Hangar $VERSION" --notes-file notes.md
+          fi
