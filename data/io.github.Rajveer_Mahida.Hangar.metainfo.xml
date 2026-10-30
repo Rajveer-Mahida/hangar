@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.Rajveer_Mahida.Hangar</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+  <name>Hangar App Manager</name>
+  <summary>One inventory for all the software on your computer</summary>
+  <developer id="io.github.rajveer_mahida">
+    <name>Rajveer Mahida</name>
+  </developer>
+  <url type="homepage">https://github.com/Rajveer-Mahida/hangar</url>
+  <url type="bugtracker">https://github.com/Rajveer-Mahida/hangar/issues</url>
+  <url type="vcs-browser">https://github.com/Rajveer-Mahida/hangar</url>
+  <description>
+    <p>Hangar detects applications installed with APT, Snap and Flatpak, AppImages, vendor packages
+    and manually installed software, and shows them in one place.</p>
+    <ul>
+      <li>Updates from APT, Snap and Flatpak with real-time progress</li>
+      <li>Safe, previewed uninstallation; user files go to the Trash</li>
+      <li>Discovery engine for software installed without a package manager</li>
+      <li>Activity history and review decisions stored locally</li>
+    </ul>
+  </description>
+  <launchable type="desktop-id">io.github.Rajveer_Mahida.Hangar.desktop</launchable>
+  <content_rating type="oars-1.1"/>
+  <releases>
+    <release version="1.0.0" date="2026-10-30">
+      <description>
+        <p>First public release.</p>
+      </description>
+    </release>
+  </releases>
+</component>

@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=Hangar App Manager
+GenericName=Software Inventory
+Comment=See, update and safely remove software from APT, Snap, Flatpak, AppImages, GitHub and manual installs
+Exec=hangar %F
+Icon=io.github.Rajveer_Mahida.Hangar
+Terminal=false
+Categories=System;PackageManager;GTK;GNOME;
+Keywords=hangar;apt;snap;flatpak;appimage;github;software;packages;uninstall;update;inventory;
+StartupNotify=true
+MimeType=application/vnd.debian.binary-package;application/vnd.flatpak.ref;application/vnd.appimage;application/x-iso9660-appimage;

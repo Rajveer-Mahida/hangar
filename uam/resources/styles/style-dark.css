@@ -1,0 +1,22 @@
+/* Dark variant: lighter text tints so badges stay readable. */
+.source-apt      { color: #ffa348; background-color: alpha(#e66100, 0.22); }
+.source-vendor   { color: #dc8add; background-color: alpha(#9141ac, 0.28); }
+.source-snap     { color: #8ff0a4; background-color: alpha(#26a269, 0.22); }
+.source-flatpak  { color: #99c1f1; background-color: alpha(#3584e4, 0.24); }
+.source-appimage { color: #93ddc2; background-color: alpha(#2190a4, 0.26); }
+.source-manual   { color: #f8e45c; background-color: alpha(#c88800, 0.24); }
+.source-unknown  { color: #c0bfbc; background-color: alpha(#9a9996, 0.22); }
+
+.tag-update   { color: #99c1f1; background-color: alpha(#3584e4, 0.24); }
+.tag-warning  { color: #f8e45c; background-color: alpha(#e5a50a, 0.22); }
+.tag-error    { color: #f66151; background-color: alpha(#e01b24, 0.22); }
+.tag-success  { color: #8ff0a4; background-color: alpha(#26a269, 0.22); }
+
+.stat-icon.updates { color: #99c1f1; background-color: alpha(#3584e4, 0.24); }
+
+.confidence-managed  { color: #8ff0a4; background-color: alpha(#26a269, 0.22); }
+.confidence-detected { color: #99c1f1; background-color: alpha(#3584e4, 0.24); }
+.confidence-unknown  { color: #f8e45c; background-color: alpha(#e5a50a, 0.22); }
+
+.note-box   { background-color: alpha(#e5a50a, 0.14); }
+.danger-box { background-color: alpha(#e01b24, 0.16); }

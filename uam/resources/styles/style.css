@@ -1,0 +1,150 @@
+/* Hangar — layered on top of libadwaita. */
+
+/* ---------- Source badges ---------- */
+.source-badge {
+  border-radius: 999px;
+  padding: 1px 9px;
+  font-size: 0.78em;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.source-apt      { color: #c25400; background-color: alpha(#e66100, 0.14); }
+.source-vendor   { color: #7a3a93; background-color: alpha(#9141ac, 0.14); }
+.source-snap     { color: #1e7f52; background-color: alpha(#26a269, 0.15); }
+.source-flatpak  { color: #1c63c4; background-color: alpha(#3584e4, 0.15); }
+.source-appimage { color: #176f80; background-color: alpha(#2190a4, 0.16); }
+.source-manual   { color: #8a5d00; background-color: alpha(#c88800, 0.17); }
+.source-unknown  { color: #5e5c64; background-color: alpha(#77767b, 0.16); }
+
+.tag {
+  border-radius: 999px;
+  padding: 1px 9px;
+  font-size: 0.78em;
+  font-weight: 700;
+}
+.tag-update   { color: #1c63c4; background-color: alpha(#3584e4, 0.15); }
+.tag-warning  { color: #9c6200; background-color: alpha(#e5a50a, 0.2); }
+.tag-error    { color: #c01c28; background-color: alpha(#e01b24, 0.13); }
+.tag-neutral  { color: alpha(currentColor, 0.75); background-color: alpha(currentColor, 0.08); }
+.tag-success  { color: #1e7f52; background-color: alpha(#26a269, 0.15); }
+
+/* ---------- Sidebar ---------- */
+.sidebar-count {
+  font-size: 0.8em;
+  font-weight: 700;
+  padding: 0 7px;
+  border-radius: 999px;
+  background-color: alpha(currentColor, 0.1);
+  min-width: 14px;
+}
+.sidebar-count.accent {
+  background-color: @accent_bg_color;
+  color: @accent_fg_color;
+}
+.sidebar-section {
+  font-size: 0.78em;
+  font-weight: 700;
+  opacity: 0.55;
+  margin: 12px 12px 4px 12px;
+}
+
+/* ---------- Overview ---------- */
+.hero-title { font-size: 1.9em; font-weight: 800; letter-spacing: -0.01em; }
+.stat-card {
+  padding: 16px 18px;
+  min-height: 92px;
+}
+.stat-card:hover { background-color: alpha(currentColor, 0.035); }
+.stat-number {
+  font-size: 2.1em;
+  font-weight: 800;
+  font-feature-settings: "tnum";
+  letter-spacing: -0.02em;
+}
+.stat-label { font-size: 0.86em; font-weight: 600; opacity: 0.7; }
+.stat-icon {
+  border-radius: 10px;
+  padding: 7px;
+  min-width: 18px;
+  min-height: 18px;
+}
+.stat-icon.source-apt, .stat-icon.source-vendor, .stat-icon.source-snap, .stat-icon.source-flatpak,
+.stat-icon.source-appimage, .stat-icon.source-manual, .stat-icon.source-unknown { padding: 7px; }
+.stat-icon.total   { color: @accent_color; background-color: alpha(@accent_bg_color, 0.14); }
+.stat-icon.updates { color: #1c63c4; background-color: alpha(#3584e4, 0.15); }
+
+.section-title { font-weight: 800; font-size: 1.05em; }
+.legend-dot {
+  min-width: 10px;
+  min-height: 10px;
+  border-radius: 999px;
+}
+.legend-apt      { background-color: #e66100; }
+.legend-vendor   { background-color: #9141ac; }
+.legend-snap     { background-color: #26a269; }
+.legend-flatpak  { background-color: #3584e4; }
+.legend-appimage { background-color: #2190a4; }
+.legend-manual   { background-color: #c88800; }
+.legend-unknown  { background-color: #9a9996; }
+
+.attention-row { padding: 10px 12px; }
+
+/* ---------- Application list / grid ---------- */
+.app-row { padding: 9px 14px; }
+.app-title { font-weight: 700; }
+.app-subtitle { opacity: 0.68; font-size: 0.92em; }
+.app-meta { opacity: 0.6; font-size: 0.85em; font-feature-settings: "tnum"; }
+.app-list { background: none; padding: 6px 0 24px 0; }
+.app-list > row { border-radius: 10px; margin: 1px 6px; }
+.app-grid { background: none; padding: 6px 6px 24px 6px; }
+.app-grid > child { border-radius: 14px; padding: 0; margin: 4px; }
+.app-tile {
+  padding: 16px 10px 12px 10px;
+  min-width: 150px;
+}
+.app-tile-name { font-weight: 700; }
+/* Same breathing room as the other pages (they start 24px below the header). */
+.filter-bar { padding: 18px 6px 8px 6px; }
+.filter-bar dropdown > button { min-height: 30px; }
+
+/* ---------- Details ---------- */
+.details-hero { padding: 6px 0 12px 0; }
+.details-name { font-size: 1.7em; font-weight: 800; letter-spacing: -0.01em; }
+.mono { font-family: monospace; font-size: 0.92em; }
+.note-box {
+  border-radius: 12px;
+  padding: 10px 14px;
+  background-color: alpha(#e5a50a, 0.12);
+}
+.info-box {
+  border-radius: 12px;
+  padding: 10px 14px;
+  background-color: alpha(currentColor, 0.05);
+}
+.danger-box {
+  border-radius: 12px;
+  padding: 10px 14px;
+  background-color: alpha(#e01b24, 0.1);
+}
+
+/* ---------- Operation bar ---------- */
+.operation-bar {
+  padding: 10px 14px;
+  border-top: 1px solid alpha(currentColor, 0.1);
+  background-color: @headerbar_bg_color;
+}
+.operation-log {
+  font-family: monospace;
+  font-size: 0.85em;
+  background: alpha(currentColor, 0.04);
+  border-radius: 8px;
+  padding: 8px;
+}
+.operation-log text { background: none; }
+
+/* ---------- Manual review ---------- */
+.confidence-managed  { color: #1e7f52; background-color: alpha(#26a269, 0.15); }
+.confidence-detected { color: #1c63c4; background-color: alpha(#3584e4, 0.15); }
+.confidence-unknown  { color: #9c6200; background-color: alpha(#e5a50a, 0.2); }
+
+.empty-icon { opacity: 0.5; }

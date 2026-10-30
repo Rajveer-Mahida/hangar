@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE policyconfig PUBLIC "-//freedesktop//DTD PolicyKit Policy Configuration 1.0//EN"
+ "http://www.freedesktop.org/standards/PolicyKit/1/policyconfig.dtd">
+<!-- One action per helper verb (matched with exec.argv1). Only updates and list refreshes
+     keep the authorization for a few minutes; installs and removals ask every time. -->
+<policyconfig>
+  <vendor>Hangar</vendor>
+  <icon_name>io.github.Rajveer_Mahida.Hangar</icon_name>
+  <action id="io.github.Rajveer_Mahida.Hangar.apt-upgrade">
+    <description>Update software</description>
+    <message>Authentication is required to update software</message>
+    <defaults>
+      <allow_any>auth_admin</allow_any>
+      <allow_inactive>auth_admin</allow_inactive>
+      <allow_active>auth_admin_keep</allow_active>
+    </defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">@HELPER_PATH@</annotate>
+    <annotate key="org.freedesktop.policykit.exec.argv1">apt-upgrade</annotate>
+  </action>
+  <action id="io.github.Rajveer_Mahida.Hangar.apt-upgrade-all">
+    <description>Update software</description>
+    <message>Authentication is required to update software</message>
+    <defaults>
+      <allow_any>auth_admin</allow_any>
+      <allow_inactive>auth_admin</allow_inactive>
+      <allow_active>auth_admin_keep</allow_active>
+    </defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">@HELPER_PATH@</annotate>
+    <annotate key="org.freedesktop.policykit.exec.argv1">apt-upgrade-all</annotate>
+  </action>
+  <action id="io.github.Rajveer_Mahida.Hangar.snap-refresh">
+    <description>Update software</description>
+    <message>Authentication is required to update software</message>
+    <defaults>
+      <allow_any>auth_admin</allow_any>
+      <allow_inactive>auth_admin</allow_inactive>
+      <allow_active>auth_admin_keep</allow_active>
+    </defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">@HELPER_PATH@</annotate>
+    <annotate key="org.freedesktop.policykit.exec.argv1">snap-refresh</annotate>
+  </action>
+  <action id="io.github.Rajveer_Mahida.Hangar.flatpak-update">
+    <description>Update software</description>
+    <message>Authentication is required to update software</message>
+    <defaults>
+      <allow_any>auth_admin</allow_any>
+      <allow_inactive>auth_admin</allow_inactive>
+      <allow_active>auth_admin_keep</allow_active>
+    </defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">@HELPER_PATH@</annotate>
+    <annotate key="org.freedesktop.policykit.exec.argv1">flatpak-update</annotate>
+  </action>
+  <action id="io.github.Rajveer_Mahida.Hangar.apt-update">
+    <description>Refresh package lists</description>
+    <message>Authentication is required to refresh the package lists</message>
+    <defaults>
+      <allow_any>auth_admin</allow_any>
+      <allow_inactive>auth_admin</allow_inactive>
+      <allow_active>auth_admin_keep</allow_active>
+    </defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">@HELPER_PATH@</annotate>
+    <annotate key="org.freedesktop.policykit.exec.argv1">apt-update</annotate>
+  </action>
+  <action id="io.github.Rajveer_Mahida.Hangar.apt-install">
+    <description>Install software</description>
+    <message>Authentication is required to install software</message>
+    <defaults>
+      <allow_any>auth_admin</allow_any>
+      <allow_inactive>auth_admin</allow_inactive>
+      <allow_active>auth_admin</allow_active>
+    </defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">@HELPER_PATH@</annotate>
+    <annotate key="org.freedesktop.policykit.exec.argv1">apt-install</annotate>
+  </action>
+  <action id="io.github.Rajveer_Mahida.Hangar.snap-install">
+    <description>Install software</description>
+    <message>Authentication is required to install software</message>
+    <defaults>
+      <allow_any>auth_admin</allow_any>
+      <allow_inactive>auth_admin</allow_inactive>
+      <allow_active>auth_admin</allow_active>
+    </defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">@HELPER_PATH@</annotate>
+    <annotate key="org.freedesktop.policykit.exec.argv1">snap-install</annotate>
+  </action>
+  <action id="io.github.Rajveer_Mahida.Hangar.flatpak-install">
+    <description>Install software</description>
+    <message>Authentication is required to install software</message>
+    <defaults>
+      <allow_any>auth_admin</allow_any>
+      <allow_inactive>auth_admin</allow_inactive>
+      <allow_active>auth_admin</allow_active>
+    </defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">@HELPER_PATH@</annotate>
+    <annotate key="org.freedesktop.policykit.exec.argv1">flatpak-install</annotate>
+  </action>
+  <action id="io.github.Rajveer_Mahida.Hangar.apt-install-deb">
+    <description>Install a downloaded package</description>
+    <message>Authentication is required to install software from a file</message>
+    <defaults>
+      <allow_any>auth_admin</allow_any>
+      <allow_inactive>auth_admin</allow_inactive>
+      <allow_active>auth_admin</allow_active>
+    </defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">@HELPER_PATH@</annotate>
+    <annotate key="org.freedesktop.policykit.exec.argv1">apt-install-deb</annotate>
+  </action>
+  <action id="io.github.Rajveer_Mahida.Hangar.flatpak-install-ref">
+    <description>Install a downloaded package</description>
+    <message>Authentication is required to install software from a file</message>
+    <defaults>
+      <allow_any>auth_admin</allow_any>
+      <allow_inactive>auth_admin</allow_inactive>
+      <allow_active>auth_admin</allow_active>
+    </defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">@HELPER_PATH@</annotate>
+    <annotate key="org.freedesktop.policykit.exec.argv1">flatpak-install-ref</annotate>
+  </action>
+  <action id="io.github.Rajveer_Mahida.Hangar.apt-remove">
+    <description>Remove software</description>
+    <message>Authentication is required to remove software</message>
+    <defaults>
+      <allow_any>auth_admin</allow_any>
+      <allow_inactive>auth_admin</allow_inactive>
+      <allow_active>auth_admin</allow_active>
+    </defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">@HELPER_PATH@</annotate>
+    <annotate key="org.freedesktop.policykit.exec.argv1">apt-remove</annotate>
+  </action>
+  <action id="io.github.Rajveer_Mahida.Hangar.snap-remove">
+    <description>Remove software</description>
+    <message>Authentication is required to remove software</message>
+    <defaults>
+      <allow_any>auth_admin</allow_any>
+      <allow_inactive>auth_admin</allow_inactive>
+      <allow_active>auth_admin</allow_active>
+    </defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">@HELPER_PATH@</annotate>
+    <annotate key="org.freedesktop.policykit.exec.argv1">snap-remove</annotate>
+  </action>
+  <action id="io.github.Rajveer_Mahida.Hangar.flatpak-uninstall">
+    <description>Remove software</description>
+    <message>Authentication is required to remove software</message>
+    <defaults>
+      <allow_any>auth_admin</allow_any>
+      <allow_inactive>auth_admin</allow_inactive>
+      <allow_active>auth_admin</allow_active>
+    </defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">@HELPER_PATH@</annotate>
+    <annotate key="org.freedesktop.policykit.exec.argv1">flatpak-uninstall</annotate>
+  </action>
+  <action id="io.github.Rajveer_Mahida.Hangar.flatpak-remove-unused">
+    <description>Remove software</description>
+    <message>Authentication is required to remove software</message>
+    <defaults>
+      <allow_any>auth_admin</allow_any>
+      <allow_inactive>auth_admin</allow_inactive>
+      <allow_active>auth_admin</allow_active>
+    </defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">@HELPER_PATH@</annotate>
+    <annotate key="org.freedesktop.policykit.exec.argv1">flatpak-remove-unused</annotate>
+  </action>
+  <action id="io.github.Rajveer_Mahida.Hangar.remove-paths">
+    <description>Delete files of manually installed software</description>
+    <message>Authentication is required to delete files of manually installed software</message>
+    <defaults>
+      <allow_any>auth_admin</allow_any>
+      <allow_inactive>auth_admin</allow_inactive>
+      <allow_active>auth_admin</allow_active>
+    </defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">@HELPER_PATH@</annotate>
+    <annotate key="org.freedesktop.policykit.exec.argv1">remove-paths</annotate>
+  </action>
+</policyconfig>
