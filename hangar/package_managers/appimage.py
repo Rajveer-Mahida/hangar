@@ -3,15 +3,20 @@
 AppImages are identified by their magic bytes (``AI\\x01``/``AI\\x02`` at
 offset 8 of the ELF header) or file extension. They are never executed:
 metadata comes from the file name, from desktop launchers that point at the
-file and from the embedded ``.upd_info`` ELF section.
+file and from the embedded ``.upd_info`` ELF section. The embedded desktop
+entry and icon of a type 2 AppImage are read from its SquashFS payload with
+``unsquashfs`` (from squashfs-tools), which only reads the file.
 """
 
 from __future__ import annotations
 
+import configparser
 import os
 import re
+import shutil
 import stat
 import struct
+import subprocess
 
 from ..core.application_model import AppRecord, Confidence, PackageManager, Source
 from ..core.desktop_entry import DesktopEntry
@@ -88,6 +93,106 @@ def read_update_info(path: str) -> str:
     except (OSError, struct.error, ValueError):
         return ""
     return ""
+
+
+def _elf_end(path: str) -> int:
+    """Byte offset where the ELF runtime ends and the SquashFS payload starts (0 if unknown)."""
+    try:
+        with open(path, "rb") as fh:
+            ident = fh.read(64)
+    except OSError:
+        return 0
+    if len(ident) < 64 or ident[:4] != b"\x7fELF":
+        return 0
+    endian = "<" if ident[5] == 1 else ">"
+    try:
+        if ident[4] == 2:
+            shoff = struct.unpack_from(endian + "Q", ident, 0x28)[0]
+            shentsize, shnum = struct.unpack_from(endian + "HH", ident, 0x3A)
+        else:
+            shoff = struct.unpack_from(endian + "I", ident, 0x20)[0]
+            shentsize, shnum = struct.unpack_from(endian + "HH", ident, 0x2E)
+    except struct.error:
+        return 0
+    return shoff + shentsize * shnum if shoff else 0
+
+
+_ICON_NAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._+-]{0,127}$")
+_MAX_ICON_BYTES = 8 * 1024 * 1024
+
+
+def _unsquashfs(unsquashfs: str, path: str, offset: int, dest: str, patterns: list[str]) -> None:
+    try:
+        subprocess.run([unsquashfs, "-o", str(offset), "-q", "-n", "-f", "-d", dest, path, *patterns],
+                       stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                       timeout=60, check=False)
+    except (OSError, subprocess.SubprocessError):
+        pass
+
+
+def _regular(path: str) -> bool:
+    try:
+        st = os.lstat(path)
+    except OSError:
+        return False
+    return stat.S_ISREG(st.st_mode) and 0 < st.st_size <= _MAX_ICON_BYTES
+
+
+def read_embedded_launcher(path: str, work_dir: str) -> dict[str, str]:
+    """Read the desktop entry and icon packed inside a type 2 AppImage, without running it.
+
+    Files are extracted into ``work_dir`` (an empty directory owned by the caller). Returns
+    the useful desktop keys (``StartupWMClass``, ``Comment``, ``Categories``) and, when one
+    was found, ``icon_file``: the path of the extracted icon inside ``work_dir``. Symlinks
+    inside the image are never followed. Returns {} if nothing could be read.
+    """
+    unsquashfs = shutil.which("unsquashfs")
+    offset = _elf_end(path)
+    if not unsquashfs or not offset or appimage_type(path) != 2:
+        return {}
+    _unsquashfs(unsquashfs, path, offset, work_dir, ["*.desktop"])
+    desktops = sorted(f for f in os.listdir(work_dir) if f.endswith(".desktop")
+                      and _regular(os.path.join(work_dir, f))) if os.path.isdir(work_dir) else []
+    if not desktops:
+        return {}
+    parser = configparser.ConfigParser(interpolation=None, strict=False)
+    parser.optionxform = str
+    try:
+        parser.read(os.path.join(work_dir, desktops[0]), encoding="utf-8")
+        entry = dict(parser["Desktop Entry"])
+    except (configparser.Error, KeyError, UnicodeDecodeError, OSError):
+        return {}
+
+    result: dict[str, str] = {}
+    for key in ("StartupWMClass", "Comment", "Categories"):
+        value = " ".join(entry.get(key, "").split())[:500]
+        if value:
+            result[key] = value
+
+    icon = entry.get("Icon", "").strip()
+    if not _ICON_NAME_RE.match(icon) or ".." in icon:
+        return result
+    hicolor = "usr/share/icons/hicolor"
+    _unsquashfs(unsquashfs, path, offset, work_dir,
+                [f"{icon}.png", f"{icon}.svg", f"{hicolor}/*/apps/{icon}.png", f"{hicolor}/scalable/apps/{icon}.svg"])
+    candidates = [os.path.join(work_dir, f"{hicolor}/scalable/apps/{icon}.svg"),
+                  os.path.join(work_dir, f"{icon}.svg")]
+    sized = []
+    base = os.path.join(work_dir, hicolor)
+    if os.path.isdir(base) and not os.path.islink(base):
+        for size_dir in os.listdir(base):
+            m = re.fullmatch(r"(\d+)x\d+", size_dir)
+            if m:
+                sized.append((int(m.group(1)), os.path.join(base, size_dir, "apps", f"{icon}.png")))
+    # Prefer the 256 px icon, then bigger ones up to 512, then anything else.
+    sized.sort(key=lambda s: (s[0] != 256, s[0] > 512, -s[0]))
+    candidates += [p for _, p in sized] + [os.path.join(work_dir, f"{icon}.png")]
+    real = os.path.realpath(work_dir) + os.sep
+    for candidate in candidates:
+        if _regular(candidate) and os.path.realpath(candidate).startswith(real):
+            result["icon_file"] = candidate
+            break
+    return result
 
 
 def name_and_version(filename: str) -> tuple[str, str]:

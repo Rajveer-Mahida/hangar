@@ -15,6 +15,7 @@ import re
 import shutil
 import stat
 import subprocess
+import tempfile
 import threading
 import urllib.parse
 from dataclasses import dataclass, field
@@ -33,7 +34,7 @@ from ..core.safety import (
     validate_flatpak_remote,
     validate_snap_name,
 )
-from ..package_managers.appimage import appimage_type, name_and_version
+from ..package_managers.appimage import appimage_type, name_and_version, read_embedded_launcher
 from ..package_managers.snap import SnapdClient, SnapdError
 from .operation_service import CommandStep, Operation, PythonStep
 from .privilege_service import helper_argv
@@ -372,7 +373,30 @@ def appimage_install_plan(source_path: str) -> dict[str, str]:
     legacy = os.path.join(apps, f"uam-appimage-{stem}.desktop")  # name used by 1.0.1 and older
     if os.path.lexists(legacy) and not os.path.lexists(launcher):
         launcher = legacy
-    return {"source": source_path, "target": target, "launcher": launcher, "name": name, "version": version}
+    icon_base = os.path.join(home, ".local", "share", "icons", os.path.splitext(os.path.basename(launcher))[0])
+    return {"source": source_path, "target": target, "launcher": launcher, "name": name, "version": version,
+            "icon_base": icon_base}
+
+
+def _install_embedded_icon(target: str, icon_base: str, log) -> dict[str, str]:
+    """Copy the AppImage's own icon next to the user's icons; returns its desktop keys."""
+    with tempfile.TemporaryDirectory(prefix="hangar-appimage-") as work:
+        meta = read_embedded_launcher(target, work)
+        icon_file = meta.pop("icon_file", "")
+        if icon_file:
+            dest = icon_base + os.path.splitext(icon_file)[1].lower()
+            try:
+                os.makedirs(os.path.dirname(dest), exist_ok=True)
+                if os.path.islink(dest):
+                    os.unlink(dest)
+                shutil.copyfile(icon_file, dest)
+                meta["Icon"] = dest
+                log(f"Installed icon {dest}")
+            except OSError as exc:
+                log(f"Could not install the icon: {exc}")
+    if not meta:
+        log("No embedded launcher found; using a generic icon")
+    return meta
 
 
 def appimage_install_operation(plan: dict[str, str]) -> Operation:
@@ -390,16 +414,20 @@ def appimage_install_operation(plan: dict[str, str]) -> Operation:
         os.makedirs(os.path.dirname(launcher), exist_ok=True)
         if os.path.lexists(launcher):
             raise RuntimeError(f"{launcher} already exists; not overwriting it.")
+        embedded = _install_embedded_icon(target, plan["icon_base"], log) if plan.get("icon_base") else {}
         kf = GLib.KeyFile()
         group = "Desktop Entry"
         kf.set_string(group, "Type", "Application")
         kf.set_string(group, "Name", plan["name"])
-        kf.set_string(group, "Comment", "AppImage application")
+        kf.set_string(group, "Comment", embedded.get("Comment", "AppImage application"))
         kf.set_string(group, "Exec", f"{_desktop_exec_quote(target)} %U")
         kf.set_string(group, "TryExec", target)
-        kf.set_string(group, "Icon", "application-x-executable")
+        kf.set_string(group, "Icon", embedded.get("Icon", "application-x-executable"))
+        if embedded.get("StartupWMClass"):
+            # Lets the dock match the running window to this launcher (and show its icon).
+            kf.set_string(group, "StartupWMClass", embedded["StartupWMClass"])
         kf.set_string(group, "Terminal", "false")
-        kf.set_string(group, "Categories", "Utility;")
+        kf.set_string(group, "Categories", embedded.get("Categories", "Utility;"))
         kf.set_string(group, "X-Hangar-Installed", "true")
         if plan.get("version"):
             kf.set_string(group, "X-AppImage-Version", plan["version"])
